@@ -14,6 +14,9 @@ dependencies:
   react-dom:
     specifier: ^19.0.0
     version: 19.1.0(react@19.1.0)
+  run-script-os:
+    specifier: ^1.1.6
+    version: 1.1.6
 
 devDependencies:
   '@eslint/js':
@@ -43,9 +46,6 @@ devDependencies:
   globals:
     specifier: ^16.0.0
     version: 16.0.0
-  run-script-os:
-    specifier: ^1.1.6
-    version: 1.1.6
   typescript:
     specifier: ~5.7.2
     version: 5.7.3
@@ -1581,7 +1581,7 @@ packages:
   /run-script-os@1.1.6:
     resolution: {integrity: sha512-ql6P2LzhBTTDfzKts+Qo4H94VUKpxKDFz6QxxwaUZN0mwvi7L3lpOI7BqPCq7lgDh3XLl0dpeXwfcVIitlrYrw==}
     hasBin: true
-    dev: true
+    dev: false
 
   /scheduler@0.26.0:
     resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
