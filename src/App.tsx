@@ -1,74 +1,15 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
+import { useState } from "react";
 import { connect as serial_connect } from "@zmkfirmware/zmk-studio-ts-client/transport/serial";
-import { RpcTransport } from "@zmkfirmware/zmk-studio-ts-client/transport/index";
 import { create_rpc_connection } from "@zmkfirmware/zmk-studio-ts-client";
 
-async function needsSerialAuthorization() {
-  const ports = await navigator.serial.getPorts();
-  if (ports.length > 0) {
-    console.log("Port selected:", ports);
-    return false;
-    // You can now use the selected port for communication
-  } else {
-    console.log("No port selected");
-    return true;
-  }
-}
-
-function useAsync<T>(asyncFunction: () => Promise<T>) {
-  const [get, set] = useState<T>();
-  useEffect(() => {
-    asyncFunction().then((result) => set(result));
-  }, [asyncFunction]);
-  return [get, set];
-}
-
-async function useDevice(): Promise<SerialPort> {
-  // await navigator.serial.requestPort();
-  const ports = await navigator.serial.getPorts();
-  if (ports.length === 0) return undefined;
-
-  console.log(ports);
-
-  // Initialize the list of available ports with `ports` on page load.
-}
-
 function App() {
-  const [needsAuth] = useAsync(needsSerialAuthorization);
-  const [port, setPort] = useState<SerialPort | undefined>(undefined);
-  useEffect(() => {
-    if (!needsAuth)
-      navigator.serial.getPorts().then((ports) => {
-        console.log("Ports:", ports);
-        setPort(ports[0]);
-      });
-  }, [needsAuth]);
-
-  // useDevice();
   return (
     <>
       <h1>ZMK Exporter</h1>
-      <div className="card">
         <div>
-          {!needsAuth || port ? (
-            <>
-              <span>
-                Serial port selected: {JSON.stringify(port?.getInfo())}
-              </span>
-              {port && <PortView port={port!} />}
-            </>
-          ) : (
-            <button
-              onClick={() => navigator.serial.requestPort().then(setPort)}
-            >
-              Please select a serial port
-            </button>
-          )}
+              <PortView />
         </div>
-      </div>
     </>
   );
 }
@@ -129,18 +70,24 @@ async function getData(conn: RpcConnection) {
   // console.warn(JSON.stringify(merged, null, 2));
 
   return { physical, keymaps: merged };
-  // setJson(JSON.stringify({ physical, keymaps: merged }, null, 2));
 }
 
-const PortView = ({ port }: { port: SerialPort }) => {
+const PortView = () => {
   const [conn, setConn] = useState<KeyboardData | undefined>(undefined);
-  // const [transport, setTransport] = useState<RpcTransport|undefined>(undefined);
-  // useEffect(() => {
-  //   serial_connect().then(t => console.log("TRANSPORT", t));
-  // }, [port]);
-  // if(!transport)return;
-
-  // }, [transport]);
+  const copy = () => navigator
+    .clipboard.writeText(JSON.stringify(conn, undefined, 2))
+    .catch((e) => console.error("Failed to copy", e));
+  const download = () => {
+    const blob = new Blob([JSON.stringify(conn, undefined, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "keyboard.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <div>
       {!conn && (
@@ -152,12 +99,14 @@ const PortView = ({ port }: { port: SerialPort }) => {
           Connect
         </button>
       )}
-      <h2>Port Info</h2>
-      {port.readable && <p>Port is readable</p>}
+            {conn && <div className="toolbar">
+        <button onClick={copy}>Copy</button>
+        <button onClick={download}>Download</button>
+        </div>}
       <pre>
       {JSON.stringify(conn,undefined,2)}
       </pre>
-      {conn && <div></div>}
+
     </div>
   );
 };
